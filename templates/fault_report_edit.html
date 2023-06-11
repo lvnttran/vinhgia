@@ -1,0 +1,90 @@
+<html>
+<head>
+    <title>Fault Details</title>
+    <link href="{{ url_for('static', path='/css/bootstrap.css') }}" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f5f5f5;
+            color: black;
+        }
+        .btn-primary {
+            background-color: #f0f0f0;
+            border-color: #f0f0f0;
+            color: black;
+        }
+        .btn-danger {
+            background-color: #f0f0f0;
+            border-color: #f0f0f0;
+            color: black;
+        }
+        .card {
+            background-color: white;
+            color: black;
+        }
+
+    </style>
+</head>
+<body>
+<div class="container w-50">
+    <div class="card text-left" style="width: 32rem;align:center;">
+        <div class="card-body">
+            <div class="card-header">
+                <h1> Edit floor </h1>
+            </div>
+            <form action="http://localhost:8000/fault/report/edit/{{ fault.fault_id }}" method="post">
+                <div class="mb-3">
+                    <label for="faultId" class="form-label">Fault Id</label>
+                    <input type="text" class="form-control" id="faultId" name="faultId" value="{{fault.fault_id}}"
+                           readonly>
+                </div>
+                <div class="mb-3">
+                    <label for="faultName" class="form-label">Fault Name</label>
+                    <input type="text" class="form-control" id="faultName" name="faultName"
+                           value="{{fault.fault_name}}">
+                </div>
+                <div class="mb-3">
+                    <label for="faultImage" class="form-label">Fault Image</label>
+                    <input type="text" class="form-control" id="faultImage" name="faultImage"
+                           value="{{fault.fault_image}}">
+                </div>
+                <div class="mb-3">
+                    <label for="faultDescription" class="form-label">Fault Description</label>
+                    <input type="text" class="form-control" id="faultDescription" name="faultDescription"
+                           value="{{fault.fault_description}}">
+                </div>
+                <div class="mb-3">
+                    <label for="faultSolution" class="form-label">Fault Solution</label>
+                    {% if fault.solutions %}
+                    <select class="form-control" id="faultSolution" name="faultSolution">
+                        {% for solution in fault.solutions %}
+                            {% if solution.solution_detail %}
+                                {% if solution.solution_id == fault.fault_id %}
+                                    <option value="{{ solution.solution_id }}" selected>{{ solution.solution_detail }}</option>
+                                {% else %}
+                                    <option value="{{ solution.solution_id }}">{{ solution.solution_detail }}</option>
+                                {% endif %}
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                    {% else %}
+                    <input type="text" class="form-control" id="faultSolution" name="faultSolution"
+                           value="NEED TO BE COMPLETED" style="color: red;">
+                    {% endif %}
+                </div>
+                <div class="mb-3">
+                    <label for="faultApproval" class="form-label">Fault Approval</label>
+                    <input type="text" class="form-control" id="faultApproval" name="faultApproval"
+                           value="{{fault.fault_approval}}">
+                </div>
+
+                <input type="hidden" name="id" value="{{ fault.fault_id }}">
+                <input type="submit" class="btn btn-primary" value="Submit"> &nbsp;&nbsp;&nbsp;&nbsp;<input type="reset"
+                                                                                                            class="btn btn-danger"
+                                                                                                            value="Reset">
+            </form>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

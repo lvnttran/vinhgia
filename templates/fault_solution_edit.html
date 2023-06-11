@@ -1,0 +1,64 @@
+<html>
+<head>
+    <title>Solution Details</title>
+    <link href="{{ url_for('static', path='/css/bootstrap.css') }}" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f5f5f5;
+            color: black;
+        }
+        .btn-primary {
+            background-color: #f0f0f0;
+            border-color: #f0f0f0;
+            color: black;
+        }
+        .btn-danger {
+            background-color: #f0f0f0;
+            border-color: #f0f0f0;
+            color: black;
+        }
+        .card {
+            background-color: white;
+            color: black;
+        }
+
+
+
+
+    </style>
+</head>
+<body>
+<div class="container w-50">
+    <div class="card text-left" style="width: 32rem;align:center;">
+        <div class="card-body">
+            <div class="card-header">
+                <h1> Edit floor </h1>
+            </div>
+            <form action="http://localhost:8000/fault/solution/edit/{{ solution.solution_id }}" method="post">
+                <div class="mb-3">
+                    <label for="solutionId" class="form-label">Solution Id</label>
+                    <input type="text" class="form-control" id="solutionId" name="solutionId"
+                           value="{{solution.solution_id}}"
+                           readonly>
+                </div>
+                <div class="mb-3">
+                    <label for="faultId" class="form-label">Fault Id</label>
+                    <input type="text" class="form-control" id="faultId" name="faultId" value="{{solution.fault_id}}">
+                </div>
+                <div class="mb-3">
+                    <label for="solutionDetail" class="form-label">Solution Detail</label>
+                    <input type="text" class="form-control" id="solutionDetail" name="solutionDetail"
+                           value="{{solution.solution_detail}}">
+                </div>
+
+                <input type="hidden" name="id" value="{{ solution.solution_id }}">
+                <input type="submit" class="btn btn-primary" value="Submit"> &nbsp;&nbsp;&nbsp;&nbsp;<input type="reset"
+                                                                                                            class="btn btn-danger"
+                                                                                                            value="Reset">
+            </form>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

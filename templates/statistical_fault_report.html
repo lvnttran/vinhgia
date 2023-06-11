@@ -1,0 +1,158 @@
+<html>
+<head>
+    <title>Fault Report View</title>
+    <style>
+        @media screen {
+            /* Styles for screen display */
+            table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+            th, td {
+                border: 1px solid #ddd;
+                padding: 8px;
+            }
+            th {
+                background-color: #f2f2f2;
+            }
+            img {
+                max-width: 100px;
+                max-height: 50px;
+            }
+            .btn {
+                display: inline-block;
+                padding: 10px 20px;
+                background-color: #007bff;
+                color: #fff;
+                text-decoration: none;
+                border-radius: 4px;
+            }
+        }
+
+        @media print {
+            /* Styles for print layout */
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 12px;
+            }
+            th, td {
+                border: 1px solid #000;
+                padding: 8px;
+            }
+            img {
+                max-width: 100px;
+                max-height: 50px;
+            }
+            .btn {
+                display: none;
+            }
+        }
+
+    </style>
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            margin-top: 50px;
+        }
+
+        .table {
+            background-color: #fff;
+            border: none;
+        }
+
+        .table thead th {
+            background-color: #808080;
+            color: #fff;
+            border: none;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .table tbody tr {
+            background-color: #fff;
+            border: none;
+        }
+
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .table td {
+            border: none;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .table td a {
+            color: #007bff;
+            text-decoration: none;
+            transition: all .3s ease-in-out;
+        }
+
+        .table td a:hover {
+            color: #0056b3;
+            text-decoration: underline;
+        }
+
+        .btn-create {
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 20px;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: all .3s ease-in-out;
+        }
+
+        .btn-create:hover {
+            background-color: #218838;
+        }
+
+    </style>
+</head>
+<body>
+<table>
+    <thead>
+    <tr>
+        <th>Fault ID</th>
+        <th>Fault Name</th>
+        <th>Fault Image</th>
+        <th>Fault Description</th>
+        <th>Fault Solution</th>
+        <th>Fault Approval</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for fault in fault_list %}
+    <tr>
+        <td>{{ fault.fault_id }}</td>
+        <td>{{ fault.fault_name }}</td>
+        <td><img src="/static/images/{{ fault.fault_image }}" alt="{{ fault.fault_image }}"></td>
+        <td>{{ fault.fault_description }}</td>
+        <td>
+            {% if fault.solutions %}
+                {% for solution in fault.solutions %}
+                    {% if solution.solution_id == fault.fault_id %}
+                        {{ solution.solution_detail }}
+                    {% endif %}
+                {% endfor %}
+            {% else %}
+                <span style="color:red">NEED TO BE COMPLETED</span>
+            {% endif %}
+        </td>
+        <td>{{ fault.fault_approval }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+<div class="text-center mt-4">
+    <a class="btn btn-create" href="http://localhost:8000/statistical/fault/report/print">Print PDF</a>
+</div>
+</body>
+</html>
