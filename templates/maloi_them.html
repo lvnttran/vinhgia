@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>THÊM LỖI</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="{{ url_for('static', path='/css/bootstrap.css') }}" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f1f1f1;
+        }
+        .container {
+            margin-top: 50px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            background-color: #fff;
+            padding: 50px;
+        }
+        .card-header h1 {
+            font-size: 2.5rem;
+            color: #222;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        label {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #555;
+        }
+        input[type="text"], textarea {
+            border-radius: 5px;
+            border: none;
+            background-color: #f7f7f7;
+            padding: 10px;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        input[type="submit"], input[type="reset"] {
+            margin-top: 20px;
+            border-radius: 5px;
+            border: none;
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        input[type="submit"]:hover, input[type="reset"]:hover {
+            background-color: #0062cc;
+        }
+        input[type="submit"]:active, input[type="reset"]:active {
+            transform: translateY(1px);
+        }
+        @media screen and (max-width: 576px) {
+            .container {
+                margin-top: 20px;
+                padding: 20px;
+            }
+            .card-header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h1>Thêm lỗi</h1>
+        </div>
+        <div class="card-body">
+            <form action="/maloi/them" method="post">
+                <div class="form-group">
+                    <label for="maloi_maloi">Mã Lỗi</label>
+                    <input type="text" class="form-control" id="maloi_maloi" name="maloi_maloi">
+                </div>
+                <div class="form-group">
+                    <label for="maloi_tenloi">Tên Lỗi</label>
+                    <input type="text" class="form-control" id="maloi_tenloi" name="maloi_tenloi">
+                </div>
+                <div class="form-group">
+                    <label for="maloi_khacphuc">Khắc Phục</label>
+                    <input type="text" class="form-control" id="maloi_khacphuc" name="maloi_khacphuc">
+                </div>
+                <div class="form-group">
+                    <label for="maloi_nguyennhan">Nguyên Nhân</label>
+                    <input type="text" class="form-control" id="maloi_nguyennhan" name="maloi_nguyennhan">
+                </div>
+                <div class="form-group">
+                    <label for="maloi_phongngua">Phòng Ngừa</label>
+                    <input type="text" class="form-control" id="maloi_phongngua" name="maloi_phongngua">
+                </div>
+                <div class="d-flex justify-content-end">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                    <button type="reset" class="btn btn-secondary ml-3">Reset</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

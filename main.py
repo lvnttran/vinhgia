@@ -1,16 +1,23 @@
 # imports
 from pydantic import BaseModel
-from fastapi import FastAPI, Request, Response, status, HTTPException, Depends, Form, Cookie
+from fastapi import FastAPI, Request, Response, status, HTTPException, Depends, Form, Cookie, File, UploadFile
 
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, Date
 from sqlalchemy.orm import Session, sessionmaker, relationship
 
 from fastapi.security import HTTPBasicCredentials, HTTPBasic
 from fastapi.responses import HTMLResponse, RedirectResponse, Response, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+
+from openpyxl import load_workbook
+import pandas as pd
+from tempfile import TemporaryFile
+
+import pdfkit
+import os
 import time
 from datetime import datetime, timedelta
 
@@ -36,34 +43,26 @@ Base = declarative_base()
 
 
 # Model
-class Product(Base):
-    __tablename__ = "product"
+class Donhang(Base):
+    __tablename__ = "donhang"
 
-    product_id = Column(Integer, primary_key=True, index=True)
-    product_name = Column(String)
-    product_image = Column(String)
-    product_price = Column(Float)
-    product_description = Column(String)
-
-
-class Order(Base):
-    __tablename__ = "order"
-
-    order_id = Column(Integer, primary_key=True, index=True)
-    order_detail = Column(String)
-    order_datein = Column(DateTime)
-    order_dateout = Column(DateTime)
-    order_description = Column(String)
+    donhang_id = Column(Integer, primary_key=True, index=True)
+    donhang_madh = Column(String)
+    donhang_masp = Column(String)
+    donhang_mota = Column(String)
+    donhang_soluong = Column(String)
+    donhang_ngay = Column(Date)
 
 
-class Productionline(Base):
-    __tablename__ = "productionline"
+class Maloi(Base):
+    __tablename__ = "maloi"
 
-    productionline_id = Column(Integer, primary_key=True, index=True)
-    productionline_name = Column(String)
-    productionline_productid = Column(Integer)
-    productionline_productquantity = Column(Integer)
-    productionline_duration = Column(String)
+    maloi_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    maloi_maloi = Column(String)
+    maloi_tenloi = Column(String)
+    maloi_khacphuc = Column(String)
+    maloi_nguyennhan = Column(String)
+    maloi_phongngua = Column(String)
 
 
 class Fault(Base):
@@ -209,26 +208,197 @@ def login(db: Session = Depends(get_db), credentials: HTTPBasicCredentials = Dep
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-# PRODUCT READ
-@app.get("/product/view", response_class=HTMLResponse, tags=["PRODUCT"])
-def read_all_product(request: Request, db: Session = Depends(get_db)):
-    result = db.query(Product).all()
-    return templates.TemplateResponse("product_view_list.html", {"request": request, "product_list": result})
+# DON HANG XEM
+@app.get("/donhang/xem", response_class=HTMLResponse, tags=["ĐƠN HÀNG"])
+def read_all_donhang(request: Request, db: Session = Depends(get_db)):
+    # Retrieve the 50 most recent records from the database
+    donhang_list = db.query(Donhang).order_by(Donhang.donhang_id.desc()).limit(50).all()
+    return templates.TemplateResponse("donhang_xem.html", {"request": request, "donhang_list": donhang_list})
 
 
-# ORDER READ
-@app.get("/order/view", response_class=HTMLResponse, tags=["ORDER"])
-def read_all_order(request: Request, db: Session = Depends(get_db)):
-    result = db.query(Order).all()
-    return templates.TemplateResponse("order_view_list.html", {"request": request, "order_list": result})
+# DON HANG IMPORT
+@app.post("/donhang/xuly", response_class=HTMLResponse, tags=["ĐƠN HÀNG"])
+async def process_donhang(request: Request, file: UploadFile = File(...), db: Session = Depends(get_db)):
+    # Read the content of the file into memory
+    content = await file.read()
+
+    # Create a seekable file-like object from the content
+    file_obj = BytesIO(content)
+
+    # Load the Excel file
+    workbook = load_workbook(file_obj, data_only=True)
+
+    # Get the first sheet
+    sheet = workbook.active
+
+    # Initialize an empty list to store the extracted data
+    data = []
+
+    # Iterate over the rows starting from the 4th row (row_index=3)
+    for row_index, row in enumerate(sheet.iter_rows(min_row=4, values_only=True), start=4):
+        # Extract the values from the row
+        donhang_madh = row[3]  # Assuming the "MÃ ĐƠN" column is in the 4th position (column D)
+        donhang_masp = row[4]  # Assuming the "MÃ SP" column is in the 5th position (column E)
+        donhang_mota = row[7]  # Assuming the "MÔ TẢ" column is in the 8th position (column H)
+        donhang_soluong = row[6]  # Assuming the "SỐ LƯỢNG" column is in the 7th position (column G)
+        donhang_ngay = row[1]  # Assuming the "NGÀY" column is in the 2nd position (column B)
+
+        # Convert the "ngày" column value to a datetime.date object
+        ngay_str = row[1]
+        if isinstance(ngay_str, datetime):
+            donhang_ngay = ngay_str.date()
+        else:
+            donhang_ngay = datetime.strptime(ngay_str, "%d/%m/%Y").date() if ngay_str else None
+
+        # Create a dictionary to store the extracted values
+        donhang_data = {
+            'donhang_madh': donhang_madh,
+            'donhang_masp': donhang_masp,
+            'donhang_mota': donhang_mota,
+            'donhang_soluong': donhang_soluong,
+            'donhang_ngay': donhang_ngay
+        }
+
+        # Append the dictionary to the data list
+        data.append(donhang_data)
+
+    # Iterate over the extracted data and save it to the database
+    for donhang_data in data:
+        donhang = Donhang(**donhang_data)
+        db.add(donhang)
+
+    db.commit()
+
+    donhang_list = db.query(Donhang).order_by(Donhang.donhang_id.desc()).limit(50).all()
+    return templates.TemplateResponse("donhang_xem.html", {"request": request, "donhang_list": donhang_list})
 
 
-# PRODUCTION LINE READ
-@app.get("/production/line/view", response_class=HTMLResponse, tags=["PRODUCTION LINE"])
-def read_all_production_line(request: Request, db: Session = Depends(get_db)):
-    result = db.query(Productionline).all()
-    return templates.TemplateResponse("productionline_view_list.html",
-                                      {"request": request, "productionline_list": result})
+# MA LOI XEM
+@app.get("/maloi/xem", response_class=HTMLResponse, tags=["MÃ LỖI"])
+def read_all_donhang(request: Request, db: Session = Depends(get_db)):
+    # Retrieve the 50 most recent records from the database
+    maloi_list = db.query(Maloi).order_by(Maloi.maloi_id.desc()).limit(50).all()
+    return templates.TemplateResponse("maloi_xem.html", {"request": request, "maloi_list": maloi_list})
+
+
+# MA LOI IMPORT
+@app.post("/maloi/xuly", response_class=HTMLResponse, tags=["MÃ LỖI"])
+async def process_maloi(request: Request, file: UploadFile = File(...), db: Session = Depends(get_db)):
+    # Read the content of the file into memory
+    content = await file.read()
+
+    # Create a seekable file-like object from the content
+    file_obj = BytesIO(content)
+
+    # Load the Excel file
+    workbook = load_workbook(file_obj, data_only=True)
+
+    # Get the first sheet
+    sheet = workbook.active
+
+    # Initialize an empty list to store the extracted data
+    data = []
+
+    # Iterate over the rows starting from the 4th row (row_index=3)
+    for row_index, row in enumerate(sheet.iter_rows(min_row=2, values_only=True), start=2):
+        # Extract the values from the row
+        maloi_maloi = row[0]  # Assuming the "MÃ LỖI" column is in the 1st position (column A)
+        maloi_tenloi = row[1]  # Assuming the "TÊN LỖI" column is in the 2nd position (column B)
+        maloi_khacphuc = row[2]  # Assuming the "HƯỚNG KHẮC PHỤC" column is in the 3rd position (column C)
+        maloi_nguyennhan = row[3]  # Assuming the "NGUYÊN NHÂN" column is in the 4th position (column D)
+        maloi_phongngua = row[4]  # Assuming the "HƯỚNG PHÒNG NGỪA" column is in the 5th position (column E)
+
+        # Create a dictionary to store the extracted values
+        maloi_data = {
+            'maloi_maloi': maloi_maloi,
+            'maloi_tenloi': maloi_tenloi,
+            'maloi_khacphuc': maloi_khacphuc,
+            'maloi_nguyennhan': maloi_nguyennhan,
+            'maloi_phongngua': maloi_phongngua
+        }
+
+        # Append the dictionary to the data list
+        data.append(maloi_data)
+
+    # Iterate over the extracted data and save it to the database
+    for maloi_data in data:
+        maloi = Maloi(**maloi_data)
+        db.add(maloi)
+
+    db.commit()
+
+    maloi_list = db.query(Maloi).order_by(Maloi.maloi_id.desc()).limit(50).all()
+    return templates.TemplateResponse("maloi_xem.html", {"request": request, "maloi_list": maloi_list})
+
+
+# MA LOI THEM
+@app.get("/maloi/themui", response_class=HTMLResponse, tags=["MÃ LỖI"])
+async def maloi_them_ui(request: Request):
+    return templates.TemplateResponse("maloi_them.html", {"request": request})
+
+
+@app.post("/maloi/them", response_class=HTMLResponse, tags=["MÃ LỖI"])
+def maloi_them(request: Request, maloi_maloi: str = Form(...), maloi_tenloi: str = Form(...),
+               maloi_khacphuc: str = Form(...),
+               maloi_nguyennhan: str = Form(...), maloi_phongngua: str = Form(...), db: Session = Depends(get_db)):
+    maloi = Maloi(maloi_maloi=maloi_maloi, maloi_tenloi=maloi_tenloi, maloi_khacphuc=maloi_khacphuc,
+                  maloi_nguyennhan=maloi_nguyennhan, maloi_phongngua=maloi_phongngua)
+    db.add(maloi)
+    db.commit()
+    time.sleep(1)
+    maloi_list = db.query(Maloi).order_by(Maloi.maloi_id.desc()).limit(50).all()
+    return templates.TemplateResponse("maloi_xem.html", {"request": request, "maloi_list": maloi_list})
+
+
+# BAOCAOSUCO THEM
+@app.get("/baocaosuco/themui", response_class=HTMLResponse, tags=["BÁO CÁO SỰ CỐ"])
+async def baocaosuco_them_ui(request: Request, db: Session = Depends(get_db)):
+    donhang_list = db.query(Donhang).all()
+    maloi_list = db.query(Maloi).all()
+    return templates.TemplateResponse("baocaosuco_them.html", {"request": request,
+                                                               "donhang_list": donhang_list, "maloi_list": maloi_list})
+
+
+# BAOCAOSUCO XEM
+@app.post("/baocaosuco/them", tags=["BÁO CÁO SỰ CỐ"])
+async def baocaosuco_them(request: Request):
+    # Get the form data
+    form_data = await request.form()
+
+    # Extract the form input values
+    madh = form_data["madh"]
+    masp = form_data["masp"]
+    maloi = form_data["maloi"]
+    tenloi = form_data["tenloi"]
+    soluongloi = form_data["soluongloi"]
+    khacphuc = form_data["khacphuc"]
+    nguyennhan = form_data["nguyennhan"]
+    phongngua = form_data["phongngua"]
+    ccemail = form_data["ccemail"]
+
+    # Generate the PDF content
+    pdf_content = f"""
+    <h1>Báo Cáo Sự Cố</h1>
+    <p>Mã Đơn Hàng: {madh}</p>
+    <p>Mã Sản Phẩm: {masp}</p>
+    <p>Mã Lỗi: {maloi}</p>
+    <p>Tên Lỗi: {tenloi}</p>
+    <p>Số Lượng Lỗi: {soluongloi}</p>
+    <p>Hướng Khắc Phục: {khacphuc}</p>
+    <p>Nguyên Nhân: {nguyennhan}</p>
+    <p>Hướng Phòng Ngừa: {phongngua}</p>
+    <p>CC Email: {ccemail}</p>
+    """
+
+    # Generate the PDF file name
+    today = date.today().strftime("%Y_%m_%d")
+    file_name = f"{madh}_{masp}_{maloi}.pdf"
+    file_path = f"/storage/baocaosuco/{today}/{file_name}"
+
+    # Generate the PDF and save it
+    pdfkit.from_string(pdf_content, file_path, options={"quiet": ""})
+
+    return {"message": "PDF generated and saved successfully"}
 
 
 # FAULT READ
@@ -417,4 +587,5 @@ def generate_fault_report_pdf(request: Request, db: Session = Depends(get_db)):
     doc.build(elements)
 
     buffer.seek(0)
-    return StreamingResponse(BufferedReader(buffer), media_type="application/pdf", headers={"Content-Disposition": "attachment; filename=fault_report.pdf"})
+    return StreamingResponse(BufferedReader(buffer), media_type="application/pdf",
+                             headers={"Content-Disposition": "attachment; filename=fault_report.pdf"})

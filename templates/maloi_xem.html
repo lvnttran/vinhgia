@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title style="color: #808080;">MÃ LỖI</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="{{ url_for('static', path='/css/bootstrap.css') }}" rel="stylesheet">
+    <link href="{{url_for('static', path='/css/home.css')}}" rel="stylesheet">
+    <style>
+        .description {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+
+
+
+    </style>
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            margin-top: 50px;
+        }
+
+        .table {
+            background-color: #fff;
+            border: none;
+        }
+
+        .table thead th {
+            background-color: #808080;
+            color: #fff;
+            border: none;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .table tbody tr {
+            background-color: #fff;
+            border: none;
+        }
+
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .table td {
+            border: none;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .table td a {
+            color: #007bff;
+            text-decoration: none;
+            transition: all .3s ease-in-out;
+        }
+
+        .table td a:hover {
+            color: #0056b3;
+            text-decoration: underline;
+        }
+
+        .btn-create {
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 20px;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: all .3s ease-in-out;
+        }
+
+        .btn-create:hover {
+            background-color: #218838;
+        }
+
+
+
+
+
+
+    </style>
+</head>
+<body>
+<a href="/">
+    <button class="home-button"><i class="fas fa-home"></i>HOME</button>
+</a>
+<div class="container">
+    <div class="container text-center">
+        <h1 class="my-5" style="font-family: cursive;">MÃ LỖI</h1>
+    </div>
+
+    <!-- Import Excel Section -->
+    <div>
+        <h3>Nhập từ Excel</h3>
+        <form action="{{ url_for('process_maloi') }}" method="post" enctype="multipart/form-data">
+            <input type="file" name="file" accept=".xlsx, .xls" required>
+            <button type="submit" class="btn btn-primary">Xử Lý</button>
+        </form>
+    </div>
+
+    <!-- View Section -->
+    <div>
+        <h3>Xem Don Hang</h3>
+        <table class="table table-hover">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>MÃ LỖI</th>
+                <th>TÊN LỖI</th>
+                <th>HƯỚNG KHÁC PHỤC</th>
+                <th>NGUYÊN NHÂN</th>
+                <th>HƯỚNG PHÒNG NGỪA</th>
+                <th>&nbsp;</th>
+                <th>&nbsp;</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for maloi in maloi_list %}
+            <tr>
+                <td>{{ maloi.maloi_id }}</td>
+                <td>{{ maloi.maloi_maloi }}</td>
+                <td>{{ maloi.maloi_tenloi }}</td>
+                <td>{{ maloi.maloi_khacphuc }}</td>
+                <td>{{ maloi.maloi_nguyennhan }}</td>
+                <td>{{ maloi.maloi_phongngua }}</td>
+                <td>
+                    <a class="btn btn-warning"
+                       href="/maloi/sua/{{maloi.maloi_id}}">Edit</a>
+                </td>
+                <td>
+                    <a class="btn btn-danger"
+                       href="/maloi/xoa/{{maloi.maloi_id}}">Delete</a>
+
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <div class="text-center mt-4">
+            <a class="btn btn-create" href="/maloi/themui">Thêm lỗi</a>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

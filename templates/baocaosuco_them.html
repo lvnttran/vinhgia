@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>BÁO CÁO SỰ CỐ</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="{{ url_for('static', path='/css/bootstrap.css') }}" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f1f1f1;
+        }
+        .container {
+            margin-top: 50px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            background-color: #fff;
+            padding: 50px;
+        }
+        .card-header h1 {
+            font-size: 2.5rem;
+            color: #222;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        label {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #555;
+        }
+        input[type="text"], textarea {
+            border-radius: 5px;
+            border: none;
+            background-color: #f7f7f7;
+            padding: 10px;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        select {
+            border-radius: 5px;
+            border: none;
+            background-color: #f7f7f7;
+            padding: 10px;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        input[type="submit"], input[type="reset"] {
+            margin-top: 20px;
+            border-radius: 5px;
+            border: none;
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        input[type="submit"]:hover, input[type="reset"]:hover {
+            background-color: #0062cc;
+        }
+        input[type="submit"]:active, input[type="reset"]:active {
+            transform: translateY(1px);
+        }
+        @media screen and (max-width: 576px) {
+            .container {
+                margin-top: 20px;
+                padding: 20px;
+            }
+            .card-header h1 {
+                font-size: 2rem;
+            }
+        }
+
+
+
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h1>Tạo Báo Cáo Sự Cố</h1>
+        </div>
+        <div class="card-body">
+            <form action="/baocaosuco/them" method="post">
+                <div class="form-group">
+                    <label for="madh">Mã Đơn Hàng</label>
+                    <select class="form-control" id="madh" name="madh">
+                        {% set selected_madh = [] %}
+                        {% for donhang in donhang_list %}
+                        {% if donhang.donhang_madh not in selected_madh %}
+                        <option value="{{ donhang.donhang_madh }}">{{ donhang.donhang_madh }}</option>
+                        {% set _ = selected_madh.append(donhang.donhang_madh) %}
+                        {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="masp">Mã Sản Phẩm</label>
+                    <select class="form-control" id="masp" name="masp">
+                        {% for donhang in donhang_list %}
+                        <option value="{{ donhang.donhang_masp }}">{{ donhang.donhang_masp }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="maloi">Mã Lỗi</label>
+                    <select class="form-control" id="maloi" name="maloi">
+                        {% for maloi in maloi_list %}
+                        <option value="{{ maloi.maloi_maloi }}">{{ maloi.maloi_maloi }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="tenloi">Tên Lỗi</label>
+                    <select class="form-control" id="tenloi" name="tenloi">
+                        {% for maloi in maloi_list %}
+                        <option value="{{ maloi.maloi_tenloi }}">{{ maloi.maloi_tenloi }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="soluongloi">Số Lượng Lỗi</label>
+                    <input type="text" class="form-control" id="soluongloi" name="soluongloi">
+                </div>
+                <div class="form-group">
+                    <label for="khacphuc">Hướng Khắc Phục</label>
+                    <div class="input-group">
+                        <select class="form-control" id="khacphuc-select" name="khacphuc-select">
+                            {% for maloi in maloi_list %}
+                            <option value="{{ maloi.maloi_khacphuc }}">{{ maloi.maloi_khacphuc }}</option>
+                            {% endfor %}
+                        </select>
+                        <input type="text" class="form-control" id="khacphuc-text" name="khacphuc-text"
+                               placeholder="Khác">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="nguyennhan">Nguyên Nhân</label>
+                    <input type="text" class="form-control" id="nguyennhan" name="nguyennhan" placeholder="Nguyên Nhân">
+                </div>
+                <div class="form-group">
+                    <label for="phongngua">Hướng Phòng Ngừa</label>
+                    <input type="text" class="form-control" id="phongngua" name="phongngua"
+                           placeholder="Hướng Phòng Ngừa">
+                </div>
+                <div class="form-group">
+                    <label for="ccemail">CC Email</label>
+                    <input type="text" class="form-control" id="ccemail" name="ccemail" placeholder="CC Email">
+                </div>
+                <div class="d-flex justify-content-end">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                    <button type="reset" class="btn btn-secondary ml-3">Reset</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

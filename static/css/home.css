@@ -1,0 +1,14 @@
+    .home-button {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      font-family: cursive;
+      background-color: transparent;
+      border: none;
+      color: #6c757d;
+      cursor: pointer;
+    }
+
+    .home-button i {
+      margin-right: 5px;
+    }
