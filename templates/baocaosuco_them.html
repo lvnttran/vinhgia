@@ -72,6 +72,12 @@
 
 
 
+
+
+
+
+
+
     </style>
 </head>
 <body>
@@ -97,8 +103,12 @@
                 <div class="form-group">
                     <label for="masp">Mã Sản Phẩm</label>
                     <select class="form-control" id="masp" name="masp">
+                        {% set selected_masp = [] %}
                         {% for donhang in donhang_list %}
+                        {% if donhang.donhang_masp not in selected_masp %}
                         <option value="{{ donhang.donhang_masp }}">{{ donhang.donhang_masp }}</option>
+                        {% set _ = selected_masp.append(donhang.donhang_masp) %}
+                        {% endif %}
                         {% endfor %}
                     </select>
                 </div>
@@ -126,12 +136,12 @@
                     <label for="khacphuc">Hướng Khắc Phục</label>
                     <div class="input-group">
                         <select class="form-control" id="khacphuc-select" name="khacphuc-select">
+                            <option value="" selected disabled hidden>Choose an option</option>
                             {% for maloi in maloi_list %}
                             <option value="{{ maloi.maloi_khacphuc }}">{{ maloi.maloi_khacphuc }}</option>
                             {% endfor %}
                         </select>
-                        <input type="text" class="form-control" id="khacphuc-text" name="khacphuc-text"
-                               placeholder="Khác">
+                        <div id="khacphuc-chosen" class="chosen-placeholder">Selected options will appear here</div>
                     </div>
                 </div>
                 <div class="form-group">
@@ -156,4 +166,32 @@
     </div>
 </div>
 </body>
+<script>
+$(document).ready(function () {
+  $('#khacphuc-select').change(function () {
+    var selectedOption = $(this).val();
+    if (selectedOption && selectedOption !== 'other') {
+      var selectedOptionText = $('#khacphuc-select option:selected').text();
+      $('#khacphuc-chosen').append('<span class="badge badge-primary selected-option" data-value="' + selectedOption + '">' + selectedOptionText + '</span>');
+      $(this).find('option:selected').remove();
+    }
+  });
+
+  $('#khacphuc-text').blur(function () {
+    var otherOption = $(this).val();
+    if (otherOption) {
+      $('#khacphuc-chosen').append('<span class="badge badge-primary selected-option" data-value="' + otherOption + '">' + otherOption + '</span>');
+      $(this).val('');
+    }
+  });
+
+  $(document).on('click', '.selected-option', function () {
+    var optionValue = $(this).data('value');
+    var optionText = $(this).text();
+    $('#khacphuc-select').append('<option value="' + optionValue + '">' + optionText + '</option>');
+    $(this).remove();
+  });
+});
+
+</script>
 </html>
