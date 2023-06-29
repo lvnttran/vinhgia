@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/fastapi_bs.iml" filepath="$PROJECT_DIR$/.idea/fastapi_bs.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/vinhgia-dev.iml" filepath="$PROJECT_DIR$/.idea/vinhgia-dev.iml" />
     </modules>
   </component>
 </project>
